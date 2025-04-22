@@ -9,14 +9,16 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->string('client_id');
+            $table->string('service_id');
+            $table->text('catatan')->nullable();
             $table->timestamps();
         });
     }
-
     /**
      * Reverse the migrations.
      */

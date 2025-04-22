@@ -9,10 +9,15 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('schedules', function (Blueprint $table) {
             $table->id();
+            $table->string('order_id');
+            $table->string('client_id');
+            $table->string('fotografer');
+            $table->string('tempat');
+            $table->dateTime('waktu');
             $table->timestamps();
         });
     }

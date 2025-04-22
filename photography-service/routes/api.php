@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PhotographyController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,3 +22,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('/ping', function() {
     return response()->json(['message' => 'PhotographyService aktif']);
 });
+
+
+Route::get('/photographies', [PhotographyController::class, 'index']);
+Route::post('/photographies', [PhotographyController::class, 'store']);
+Route::get('/photographies/{id}', [PhotographyController::class, 'show']);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Portfolio;
 use Illuminate\Http\Request;
+use GuzzleHttp\Client;
 
 class PortfolioController extends Controller
 {
@@ -12,7 +13,7 @@ class PortfolioController extends Controller
      */
     public function index()
     {
-        //
+        return Portfolio::all();
     }
 
     /**
@@ -28,15 +29,33 @@ class PortfolioController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $photography_id = $request->input('photography_id');
+        $judul = $request->input('judul');
+        $deskripsi = $request->input('deskripsi');
+
+        // Menggunakan Guzzle untuk cek apakah photography_id valid
+        $client = new Client();
+        $photographyResponse = $client->get('http://localhost:8004/api/photographies/' . $photography_id);
+
+        if ($photographyResponse->getStatusCode() != 200) {
+            return response()->json(['error' => 'Photography not found'], 404);
+        }
+
+        $portfolio = Portfolio::create([
+            'photography_id' => $photography_id,
+            'judul' => $judul,
+            'deskripsi' => $deskripsi,
+        ]);
+
+        return response()->json($portfolio, 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Portfolio $portfolio)
+    public function show($id)
     {
-        //
+        return Portfolio::findOrFail($id);
     }
 
     /**

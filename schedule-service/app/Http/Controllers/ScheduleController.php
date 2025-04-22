@@ -12,7 +12,7 @@ class ScheduleController extends Controller
      */
     public function index()
     {
-        //
+        return Schedule::all();
     }
 
     /**
@@ -28,15 +28,29 @@ class ScheduleController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $order_id = $request->input('order_id');
+        $client_id = $request->input('client_id');
+        $fotografer = $request->input('fotografer');
+        $tempat = $request->input('tempat');
+        $waktu = $request->input('waktu');
+
+        $schedule = Schedule::create([
+            'order_id' => $order_id,
+            'client_id' => $client_id,
+            'fotografer' => $fotografer,
+            'tempat' => $tempat,
+            'waktu' => $waktu,
+        ]);
+
+        return response()->json($schedule, 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Schedule $schedule)
+    public function show($id)
     {
-        //
+        return Schedule::findOrFail($id);
     }
 
     /**

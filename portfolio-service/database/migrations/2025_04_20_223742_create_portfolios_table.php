@@ -9,10 +9,13 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('portfolios', function (Blueprint $table) {
             $table->id();
+            $table->string('photography_id');
+            $table->string('judul');
+            $table->text('deskripsi');
             $table->timestamps();
         });
     }

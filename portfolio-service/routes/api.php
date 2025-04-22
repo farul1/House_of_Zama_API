@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PortfolioController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,3 +22,8 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('/ping', function() {
     return response()->json(['message' => 'PortfolioService aktif']);
 });
+
+
+Route::get('/portfolios', [PortfolioController::class, 'index']);
+Route::post('/portfolios', [PortfolioController::class, 'store']);
+Route::get('/portfolios/{id}', [PortfolioController::class, 'show']);

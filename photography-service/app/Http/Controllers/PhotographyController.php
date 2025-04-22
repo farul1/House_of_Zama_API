@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Photography;
 use Illuminate\Http\Request;
+use App\Models\Photography;
+use GuzzleHttp\Client;
 
 class PhotographyController extends Controller
 {
@@ -12,7 +13,7 @@ class PhotographyController extends Controller
      */
     public function index()
     {
-        //
+        return Photography::all();
     }
 
     /**
@@ -28,15 +29,32 @@ class PhotographyController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $schedule_id = $request->input('schedule_id');
+        $foto = $request->input('foto');
+        $status = $request->input('status');
+
+        $client = new Client();
+        $scheduleResponse = $client->get('http://localhost:8003/api/schedules/' . $schedule_id);
+
+        if ($scheduleResponse->getStatusCode() != 200) {
+            return response()->json(['error' => 'Schedule not found'], 404);
+        }
+
+        $photography = Photography::create([
+            'schedule_id' => $schedule_id,
+            'foto' => $foto,
+            'status' => $status,
+        ]);
+
+        return response()->json($photography, 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Photography $photography)
+    public function show($id)
     {
-        //
+        return Photography::findOrFail($id);
     }
 
     /**

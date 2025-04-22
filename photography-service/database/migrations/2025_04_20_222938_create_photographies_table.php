@@ -9,10 +9,13 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('photographies', function (Blueprint $table) {
             $table->id();
+            $table->string('schedule_id');
+            $table->string('foto');
+            $table->string('status');
             $table->timestamps();
         });
     }
