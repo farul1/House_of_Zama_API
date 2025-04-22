@@ -1,0 +1,28 @@
+1. ClientService
+ Layanan ini untuk menyimpan dan menyediakan data klien seperti nama, email, nomor telepon, perusahaan, dan lokasi.
+ - Digunakan oleh: OrderService, ScheduleService, PortfolioService
+ - consumer dari: OrderService (histori pemesanan)
+2. ServiceCatalogService
+  Layanan ini untuk Menyediakan daftar layanan fotografi yang bisa dipilih klien
+ - Digunakan Oleh; OrderService
+3. OrderService
+ Layanan ini untuk Menangani pemesanan jasa oleh klien
+ - Digunakan Oleh: ScheduleService, ClientService (untuk histori), PortfolioService
+ - Consumer dari: ClientService, ServiceCatalogService
+4. ScheduleService
+  Layanan ini untuk Menjadwalkan sesi foto, atur fotografer, tempat, waktu.
+ - Digunakan 0leh: PhotographyService
+ - consumer dari: OrderService, ClientService
+
+
+------------------------------------------
+
+
+
+Service                        | Port
+client-service                 | 8001
+service-catalog-service        | 8002
+order-service                  | 8003
+schedule-service               | 8004
+photography-service            | 8005
+portfolio-service              | 8006
