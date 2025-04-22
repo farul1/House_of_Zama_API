@@ -8,6 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 class Schedule extends Model
 {
     use HasFactory;
-    protected $fillable = ['order_id', 'client_id', 'fotografer', 'tempat', 'waktu'];
 
+    protected $fillable = [
+        'order_id',
+        'client_id',
+        'fotografer',
+        'tempat',
+        'waktu',
+    ];
+
+    public function client()
+    {
+        return $this->belongsTo(Client::class, 'client_id', 'id');
+    }
 }

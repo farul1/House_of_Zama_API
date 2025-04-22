@@ -5,80 +5,67 @@ namespace App\Http\Controllers;
 use App\Models\Portfolio;
 use Illuminate\Http\Request;
 use GuzzleHttp\Client;
+use Illuminate\Validation\ValidationException;
+use App\Http\Resources\PortfolioResource;
+
 
 class PortfolioController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
-    {
-        return Portfolio::all();
-    }
+{
+    $data = Portfolio::all();
+    return new PortfolioResource($data, 'Success', 'List of all portfolio items');
+}
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'photography_id' => 'required|exists:photographies,id',
+        'judul' => 'required|string',
+        'deskripsi' => 'required|string',
+    ]);
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $photography_id = $request->input('photography_id');
-        $judul = $request->input('judul');
-        $deskripsi = $request->input('deskripsi');
-
-        // Menggunakan Guzzle untuk cek apakah photography_id valid
+    try {
         $client = new Client();
-        $photographyResponse = $client->get('http://localhost:8004/api/photographies/' . $photography_id);
+        $photographyResponse = $client->get('http://localhost:8005/api/photographies/' . $validated['photography_id']);
 
         if ($photographyResponse->getStatusCode() != 200) {
-            return response()->json(['error' => 'Photography not found'], 404);
+            return new PortfolioResource(null, 'Failed', 'Photography not found');
         }
 
-        $portfolio = Portfolio::create([
-            'photography_id' => $photography_id,
-            'judul' => $judul,
-            'deskripsi' => $deskripsi,
-        ]);
+        $portfolio = Portfolio::create($validated);
+        return new PortfolioResource($portfolio, 'Success', 'Portfolio created successfully');
 
-        return response()->json($portfolio, 201);
+    } catch (\Exception $e) {
+        return new PortfolioResource(null, 'Failed', 'Something went wrong, please try again later.');
+    }
+}
+
+public function show($id)
+{
+    $portfolio = Portfolio::find($id);
+    if (!$portfolio) {
+        return new PortfolioResource(null, 'Failed', 'Portfolio not found');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show($id)
-    {
-        return Portfolio::findOrFail($id);
-    }
+    return new PortfolioResource($portfolio, 'Success', 'Portfolio found');
+}
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Portfolio $portfolio)
-    {
-        //
-    }
+public function update(Request $request, Portfolio $portfolio)
+{
+    $validated = $request->validate([
+        'judul' => 'nullable|string',
+        'deskripsi' => 'nullable|string',
+    ]);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Portfolio $portfolio)
-    {
-        //
-    }
+    $portfolio->update($validated);
+    return new PortfolioResource($portfolio, 'Success', 'Portfolio updated successfully');
+}
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Portfolio $portfolio)
-    {
-        //
-    }
+public function destroy(Portfolio $portfolio)
+{
+    $portfolio->delete();
+    return new PortfolioResource(null, 'Success', 'Portfolio deleted successfully');
+}
+
 }

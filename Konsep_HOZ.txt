@@ -1,23 +1,127 @@
-1. ClientService
- Layanan ini untuk menyimpan dan menyediakan data klien seperti nama, email, nomor telepon, perusahaan, dan lokasi.
- - Digunakan oleh: OrderService, ScheduleService, PortfolioService
- - consumer dari: OrderService (histori pemesanan)
+ 1. ClientService
+- Fungsi Utama: Menyimpan dan menyediakan data klien.
+- Provider Untuk:  
+  - `OrderService`  
+  - `ScheduleService`  
+  - `PortfolioService`
+- Consumer Dari:  
+  - `OrderService` (untuk melihat histori pemesanan)
+- Data yang Dikelola:  
+  `client_id`, `name`, `email`, `phone`, `company_name`, `address`
+- Contoh Data:  
+
+  {
+    "client_id": "CLT001",
+    "name": "Rizky A",
+    "email": "rizky@email.com",
+    "phone": "08123456789",
+    "company": "PT Kreatif",
+    "location": "Jakarta"
+  }
+
 2. ServiceCatalogService
-  Layanan ini untuk Menyediakan daftar layanan fotografi yang bisa dipilih klien
- - Digunakan Oleh; OrderService
+- Fungsi Utama: Menyediakan daftar layanan fotografi yang bisa dipilih klien.
+- Provider Untuk:
+  - `OrderService`
+- Consumer Dari  
+  - (Tidak ada)
+- Data yang Dikelola:  
+  `service_id`, `title`, `description`, `price`, `duration`, `category`
+- Contoh Data:
+
+  {
+    "service_id": "SRV001",
+    "title": "Prewedding Outdoor",
+    "description": "Sesi prewedding di luar ruangan",
+    "price": 2500000,
+    "duration": 120,
+    "category": "Prewedding"
+  }
+
 3. OrderService
- Layanan ini untuk Menangani pemesanan jasa oleh klien
- - Digunakan Oleh: ScheduleService, ClientService (untuk histori), PortfolioService
- - Consumer dari: ClientService, ServiceCatalogService
+- Fungsi Utama: Menangani pemesanan jasa oleh klien.
+- Provider Untuk:  
+  - `ScheduleService`  
+  - `PortfolioService`
+- Consumer Dari:  
+  - `ClientService`  
+  - `ServiceCatalogService`
+- Data yang Dikelola:  
+  `order_id`, `client_id`, `service_id`, `order_date`, `notes`, `status`
+- Contoh Data: 
+
+  {
+    "order_id": "ORD001",
+    "client_id": "CLT001",
+    "service_id": "SRV001",
+    "order_date": "2025-04-18",
+    "notes": "Tolong bawa lighting",
+    "status": "pending"
+  }
+
 4. ScheduleService
-  Layanan ini untuk Menjadwalkan sesi foto, atur fotografer, tempat, waktu.
- - Digunakan 0leh: PhotographyService
- - consumer dari: OrderService, ClientService
+- Fungsi Utama: Menjadwalkan sesi foto, mengatur fotografer, tempat, dan waktu.
+- Provider Untuk:  
+  - `PhotographyService`
+- Consumer Dari:  
+  - `OrderService`  
+  - `ClientService`
+- Data yang Dikelola:  
+  `schedule_id`, `order_id`, `scheduled_date`, `scheduled_time`, `duration`, `photographer`, `location`, `status`
+- Contoh Data: 
 
+  {
+    "schedule_id": "SCH001",
+    "order_id": "ORD001",
+    "scheduled_date": "2025-04-25",
+    "scheduled_time": "14:00",
+    "duration_minutes": 120,
+    "photographer": "Adiawarja",
+    "location": "HOZ Bali",
+    "status": "confirmed"
+  }
 
-------------------------------------------
+5. PhotographyService
+- Fungsi Utama: Mengelola fotografer dan hasil foto dari sesi pemotretan.
+- Provider Untuk:  
+  - `PortfolioService`
+- Consumer Dari:  
+  - `ScheduleService`
+- Data yang Dikelola:  
+  `photographer_id`, `name`, `specialty`, `availability`, `experience_years`, `location`
+- Contoh Data:  
 
+  {
+    "photographer_id": "PH001",
+    "name": "Adiawarja",
+    "specialty": "Prewedding",
+    "availability": "Available",
+    "experience_years": 8,
+    "location": "Bali"
+  }
 
+6. PortfolioService
+- Fungsi Utama: Menyimpan hasil akhir sesi foto dan portofolio klien.
+- Provider Untuk:  
+  - `ClientService` (arsip), bisa juga frontend user
+- Consumer Dari:  
+  - `PhotographyService`  
+  - `OrderService`
+- Data yang Dikelola:  
+  `asset_id`, `order_id`, `client_id`, `file_url`, `uploaded_at`, `status`, `notes`
+- Contoh Data:  
+
+  {
+    "asset_id": "AST001",
+    "order_id": "ORD001",
+    "client_id": "CLT001",
+    "file_url": "hozstudio.com/assets/AST001.jpg",
+    "uploaded_at": "2025-04-27",
+    "status": "delivered",
+    "notes": "Retouched"
+  }
+
+---------------------------------------------------------------------
 
 Service                        | Port
 client-service                 | 8001
@@ -26,3 +130,4 @@ order-service                  | 8003
 schedule-service               | 8004
 photography-service            | 8005
 portfolio-service              | 8006
+

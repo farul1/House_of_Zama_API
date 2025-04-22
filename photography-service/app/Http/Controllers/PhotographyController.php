@@ -2,82 +2,73 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Photography;
+use Illuminate\Http\Request;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\RequestException;
+use App\Http\Resources\PhotographyResource;
+
+
 
 class PhotographyController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        return Photography::all();
-    }
+public function index()
+{
+    $data = Photography::all();
+    return new PhotographyResource($data, 'Success', 'List of all photography data');
+}
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'schedule_id' => 'required|exists:schedules,id',
+        'foto' => 'required|string',
+        'status' => 'required|string',
+    ]);
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $schedule_id = $request->input('schedule_id');
-        $foto = $request->input('foto');
-        $status = $request->input('status');
-
-        $client = new Client();
-        $scheduleResponse = $client->get('http://localhost:8003/api/schedules/' . $schedule_id);
+    try {
+        $client = new \GuzzleHttp\Client();
+        $scheduleResponse = $client->get('http://localhost:8004/api/schedules/' . $validated['schedule_id']);
 
         if ($scheduleResponse->getStatusCode() != 200) {
-            return response()->json(['error' => 'Schedule not found'], 404);
+            return new PhotographyResource(null, 'Failed', 'Schedule not found');
         }
 
-        $photography = Photography::create([
-            'schedule_id' => $schedule_id,
-            'foto' => $foto,
-            'status' => $status,
-        ]);
+        $photography = Photography::create($validated);
+        return new PhotographyResource($photography, 'Success', 'Photography created successfully');
 
-        return response()->json($photography, 201);
+    } catch (RequestException $e) {
+        return new PhotographyResource(null, 'Failed', 'Failed to connect to the schedule service.');
+    } catch (\Exception $e) {
+        return new PhotographyResource(null, 'Failed', 'Something went wrong, please try again later.');
     }
+}
 
-    /**
-     * Display the specified resource.
-     */
-    public function show($id)
+public function show($id)
+{
+    $photography = Photography::find($id);
+    if ($photography) {
+        return new PhotographyResource($photography, 'Success', 'Photography found');
+    } else {
+        return new PhotographyResource(null, 'Failed', 'Photography not found');
+    }
+}
+
+public function update(Request $request, Photography $photography)
+{
+    $validated = $request->validate([
+        'foto' => 'nullable|string',
+        'status' => 'nullable|string',
+    ]);
+
+    $photography->update($validated);
+    return new PhotographyResource($photography, 'Success', 'Photography updated successfully');
+}
+
+public function destroy(Photography $photography)
     {
-        return Photography::findOrFail($id);
+        $photography->delete();
+        return new PhotographyResource(null, 'Success', 'Photography deleted successfully');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Photography $photography)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Photography $photography)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Photography $photography)
-    {
-        //
-    }
 }

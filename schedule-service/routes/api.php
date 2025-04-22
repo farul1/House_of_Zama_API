@@ -24,6 +24,4 @@ Route::get('/ping', function() {
     return response()->json(['message' => 'ScheduleService aktif']);
 });
 
-Route::get('/schedules', [ScheduleController::class, 'index']);
-Route::post('/schedules', [ScheduleController::class, 'store']);
-Route::get('/schedules/{id}', [ScheduleController::class, 'show']);
+Route::resource('schedules', ScheduleController::class);

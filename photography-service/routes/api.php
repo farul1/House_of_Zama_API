@@ -24,6 +24,4 @@ Route::get('/ping', function() {
 });
 
 
-Route::get('/photographies', [PhotographyController::class, 'index']);
-Route::post('/photographies', [PhotographyController::class, 'store']);
-Route::get('/photographies/{id}', [PhotographyController::class, 'show']);
+Route::resource('photographies', PhotographyController::class);

@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ServiceCatalogController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,3 +22,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 Route::get('/ping', function() {
     return response()->json(['message' => 'ServiceCatalogService aktif']);
 });
+
+Route::get('/clients', [ServiceCatalogController::class, 'getClients']);
+
+Route::resource('service-catalog', ServiceCatalogController::class);

@@ -4,76 +4,63 @@ namespace App\Http\Controllers;
 
 use App\Models\Schedule;
 use Illuminate\Http\Request;
+use App\Http\Resources\ScheduleResource;
+
 
 class ScheduleController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
-    {
-        return Schedule::all();
+{
+    $schedules = Schedule::all();
+    return new ScheduleResource($schedules, 'Success', 'List of all schedules');
+}
+
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'order_id'   => 'required|string|max:255',
+        'client_id'  => 'required|string|max:255',
+        'fotografer' => 'required|string|max:255',
+        'tempat'     => 'required|string|max:255',
+        'waktu'      => 'required|date',
+    ]);
+
+    $schedule = Schedule::create($validated);
+    return new ScheduleResource($schedule, 'Success', 'Schedule created successfully');
+}
+
+public function show($id)
+{
+    $schedule = Schedule::find($id);
+    if (!$schedule) {
+        return new ScheduleResource(null, 'Failed', 'Schedule not found');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+    return new ScheduleResource($schedule, 'Success', 'Schedule found');
+}
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $order_id = $request->input('order_id');
-        $client_id = $request->input('client_id');
-        $fotografer = $request->input('fotografer');
-        $tempat = $request->input('tempat');
-        $waktu = $request->input('waktu');
+public function update(Request $request, $id)
+{
+    $validated = $request->validate([
+        'order_id'   => 'required|string|max:255',
+        'client_id'  => 'required|string|max:255',
+        'fotografer' => 'required|string|max:255',
+        'tempat'     => 'required|string|max:255',
+        'waktu'      => 'required|date',
+    ]);
 
-        $schedule = Schedule::create([
-            'order_id' => $order_id,
-            'client_id' => $client_id,
-            'fotografer' => $fotografer,
-            'tempat' => $tempat,
-            'waktu' => $waktu,
-        ]);
+    $schedule = Schedule::findOrFail($id);
+    $schedule->update($validated);
 
-        return response()->json($schedule, 201);
-    }
+    return new ScheduleResource($schedule, 'Success', 'Schedule updated successfully');
+}
 
-    /**
-     * Display the specified resource.
-     */
-    public function show($id)
-    {
-        return Schedule::findOrFail($id);
-    }
+public function destroy($id)
+{
+    $schedule = Schedule::findOrFail($id);
+    $schedule->delete();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Schedule $schedule)
-    {
-        //
-    }
+    return new ScheduleResource(null, 'Success', 'Schedule deleted successfully');
+}
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Schedule $schedule)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Schedule $schedule)
-    {
-        //
-    }
 }

@@ -13,12 +13,15 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->string('client_id');
-            $table->string('service_id');
+            $table->unsignedBigInteger('client_id');   // Hanya ID, tidak refer ke tabel 'clients'
+            $table->unsignedBigInteger('service_id');  // Sama juga
             $table->text('catatan')->nullable();
             $table->timestamps();
         });
+
     }
+
+
     /**
      * Reverse the migrations.
      */

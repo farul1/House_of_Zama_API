@@ -23,4 +23,8 @@ Route::get('/ping', function() {
     return response()->json(['message' => 'ClientService aktif']);
 });
 
-Route::apiResource('clients', ClientController::class);
+Route::prefix('client-service')->group(function () {
+    Route::apiResource('clients', ClientController::class);
+    Route::get('clients/{id}/orders', [ClientController::class, 'getOrderHistory']);
+});
+

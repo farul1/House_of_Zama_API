@@ -5,80 +5,78 @@ namespace App\Http\Controllers;
 use App\Models\ServiceCatalog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use App\Http\Resources\ServiceCatalogResource;
+
 
 class ServiceCatalogController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
-    {
-        return ServiceCatalog::all();
+{
+    $services = ServiceCatalog::all();
+    return new ServiceCatalogResource($services, 'Success', 'List of all services');
+}
+
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'nama_layanan' => 'required|string|max:255',
+        'deskripsi'    => 'required|string',
+        'harga'        => 'required|numeric',
+        'kategori'     => 'required|string|max:255',
+        'durasi'       => 'required|integer',
+    ]);
+
+    $service = ServiceCatalog::create($validated);
+    return new ServiceCatalogResource($service, 'Success', 'Service created successfully');
+}
+
+public function show($id)
+{
+    $service = ServiceCatalog::find($id);
+    if (!$service) {
+        return new ServiceCatalogResource(null, 'Failed', 'Service not found');
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+    return new ServiceCatalogResource($service, 'Success', 'Service found');
+}
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        $request->validate([
-            'nama_layanan' => 'required',
-            'deskripsi'    => 'required',
-            'harga'        => 'required|numeric',
-            'kategori'     => 'required',
-            'durasi'       => 'required|integer',
-            ]);
+public function update(Request $request, $id)
+{
+    $validated = $request->validate([
+        'nama_layanan' => 'required|string|max:255',
+        'deskripsi'    => 'required|string',
+        'harga'        => 'required|numeric',
+        'kategori'     => 'required|string|max:255',
+        'durasi'       => 'required|integer',
+    ]);
 
-        return ServiceCatalog::create($request->all());
-    }
+    $service = ServiceCatalog::findOrFail($id);
+    $service->update($validated);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show($id)
-    {
-        return ServiceCatalog::findOrFail($id);
-    }
+    return new ServiceCatalogResource($service, 'Success', 'Service updated successfully');
+}
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(ServiceCatalog $serviceCatalog)
-    {
-        //
-    }
+public function destroy($id)
+{
+    $service = ServiceCatalog::findOrFail($id);
+    $service->delete();
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
-    {
-        $service = ServiceCatalog::findOrFail($id);
-        $service->update($request->all());
+    return new ServiceCatalogResource(null, 'Success', 'Service deleted successfully');
+}
 
-        return $service;
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($id)
-    {
-        return ServiceCatalog::destroy($id);
-    }
-
-    public function getClients()
-    {
+public function getClients()
+{
+    try {
         $response = Http::get('http://localhost:8001/api/clients');
-        return $response->json();
+
+        if ($response->successful()) {
+            return response()->json($response->json(), 200);
+        }
+
+        return response()->json(['error' => 'Client service not available'], 500);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Failed to connect to Client service'], 500);
     }
+}
 
 }

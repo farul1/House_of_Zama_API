@@ -30,5 +30,29 @@ return [
         'secret' => env('AWS_SECRET_ACCESS_KEY'),
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
+    'client_service' => [
+        'url' => env('CLIENT_SERVICE_URL'),
+    ],
+
+    'service_catalog_service' => [
+        'url' => env('SERVICE_CATALOG_SERVICE_URL'),
+    ],
+
+    'order_service' => [
+        'url' => env('ORDER_SERVICE_URL'),
+    ],
+
+    'schedule_service' => [
+        'url' => env('SCHEDULE_SERVICE_URL'),
+    ],
+
+    'photography_service' => [
+        'url' => env('PHOTOGRAPHY_SERVICE_URL'),
+    ],
+
+    'portfolio_service' => [
+        'url' => env('PORTFOLIO_SERVICE_URL'),
+    ],
+
 
 ];

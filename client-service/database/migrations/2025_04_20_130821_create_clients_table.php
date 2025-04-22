@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('perusahaan');
             $table->string('lokasi');
             $table->timestamps();
+            $table->softDeletes(); // ✅ Tambahkan baris ini
         });
     }
 
