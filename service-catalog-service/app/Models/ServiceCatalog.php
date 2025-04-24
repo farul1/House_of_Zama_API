@@ -8,5 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class ServiceCatalog extends Model
 {
     use HasFactory;
-    protected $fillable = ['nama_layanan', 'deskripsi', 'harga', 'durasi', 'kategori'];
+
+    protected $fillable = [
+        'service_id', 'nama_layanan', 'deskripsi', 'harga', 'durasi', 'kategori'
+    ];
+
+    public $timestamps = false;  
 }

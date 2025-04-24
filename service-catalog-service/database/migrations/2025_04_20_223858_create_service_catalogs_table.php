@@ -4,29 +4,23 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateServiceCatalogsTable extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
+    public function up()
     {
         Schema::create('service_catalogs', function (Blueprint $table) {
-            $table->id();
+            $table->string('service_id', 50)->primary();  
             $table->string('nama_layanan');
             $table->text('deskripsi');
-            $table->decimal('harga', 10, 2);
-            $table->string('durasi');
+            $table->decimal('harga', 15, 2);
+            $table->integer('durasi');
             $table->string('kategori');
-            $table->timestamps();
+            $table->timestamps();  
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('service_catalogs');
     }
-};
+}

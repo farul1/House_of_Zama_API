@@ -23,7 +23,4 @@ Route::get('/ping', function() {
     return response()->json(['message' => 'PortfolioService aktif']);
 });
 
-
-Route::get('/portfolios', [PortfolioController::class, 'index']);
-Route::post('/portfolios', [PortfolioController::class, 'store']);
-Route::get('/portfolios/{id}', [PortfolioController::class, 'show']);
+Route::resource('portfolios', PortfolioController::class);

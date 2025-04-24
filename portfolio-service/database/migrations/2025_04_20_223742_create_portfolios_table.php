@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('portfolios', function (Blueprint $table) {
             $table->id();
-            $table->string('photography_id');
+            $table->unsignedBigInteger('photography_id');
             $table->string('judul');
             $table->text('deskripsi');
             $table->timestamps();
