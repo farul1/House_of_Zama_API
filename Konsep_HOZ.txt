@@ -1,125 +1,80 @@
- 1. ClientService
-- Fungsi Utama: Menyimpan dan menyediakan data klien.
-- Provider Untuk:  
-  - `OrderService`  
-  - `ScheduleService`  
-  - `PortfolioService`
-- Consumer Dari:  
-  - `OrderService` (untuk melihat histori pemesanan)
-- Data yang Dikelola:  
-  `client_id`, `name`, `email`, `phone`, `company_name`, `address`
-- Contoh Data:  
+1. ClientService
+- Provider untuk: Order, Schedule, Portfolio (hanya melalui ID)
+- Consumer dari: Tidak ada (histori pemesanan cukup diambil dari OrderService)
+  
+Revisi:  
+- Hilangkan ketergantungan ke OrderService. Hanya simpan client_id dan biarkan frontend mengakses histori melalui OrderService dengan endpoint: /orders/client/{client_id}.
 
-  {
-    "client_id": "CLT001",
-    "name": "Rizky A",
-    "email": "rizky@email.com",
-    "phone": "08123456789",
-    "company": "PT Kreatif",
-    "location": "Jakarta"
-  }
 
-2. ServiceCatalogService
-- Fungsi Utama: Menyediakan daftar layanan fotografi yang bisa dipilih klien.
-- Provider Untuk:
-  - `OrderService`
-- Consumer Dari  
-  - (Tidak ada)
-- Data yang Dikelola:  
-  `service_id`, `title`, `description`, `price`, `duration`, `category`
-- Contoh Data:
+ 2. ServiceCatalogService
+- Provider untuk: OrderService
+- Consumer dari: Tidak ada
 
-  {
-    "service_id": "SRV001",
-    "title": "Prewedding Outdoor",
-    "description": "Sesi prewedding di luar ruangan",
-    "price": 2500000,
-    "duration": 120,
-    "category": "Prewedding"
-  }
+Saran:  
+- Tidak perlu perubahan. ServiceCatalogService sudah berfungsi sebagai *read-only service* yang menyajikan daftar layanan tanpa ketergantungan lain.
 
-3. OrderService
-- Fungsi Utama: Menangani pemesanan jasa oleh klien.
-- Provider Untuk:  
-  - `ScheduleService`  
-  - `PortfolioService`
-- Consumer Dari:  
-  - `ClientService`  
-  - `ServiceCatalogService`
-- Data yang Dikelola:  
-  `order_id`, `client_id`, `service_id`, `order_date`, `notes`, `status`
-- Contoh Data: 
 
-  {
-    "order_id": "ORD001",
-    "client_id": "CLT001",
-    "service_id": "SRV001",
-    "order_date": "2025-04-18",
-    "notes": "Tolong bawa lighting",
-    "status": "pending"
-  }
+ 3. OrderService
+- Provider untuk: Schedule, Portfolio
+- Consumer dari: ClientService, ServiceCatalog
 
-4. ScheduleService
-- Fungsi Utama: Menjadwalkan sesi foto, mengatur fotografer, tempat, dan waktu.
-- Provider Untuk:  
-  - `PhotographyService`
-- Consumer Dari:  
-  - `OrderService`  
-  - `ClientService`
-- Data yang Dikelola:  
-  `schedule_id`, `order_id`, `scheduled_date`, `scheduled_time`, `duration`, `photographer`, `location`, `status`
-- Contoh Data: 
+Saran:  
+- Akses data ClientService dan ServiceCatalog dilakukan melalui HTTP call atau queue async jika diperlukan.
 
-  {
-    "schedule_id": "SCH001",
-    "order_id": "ORD001",
-    "scheduled_date": "2025-04-25",
-    "scheduled_time": "14:00",
-    "duration_minutes": 120,
-    "photographer": "Adiawarja",
-    "location": "HOZ Bali",
-    "status": "confirmed"
-  }
 
-5. PhotographyService
-- Fungsi Utama: Mengelola fotografer dan hasil foto dari sesi pemotretan.
-- Provider Untuk:  
-  - `PortfolioService`
-- Consumer Dari:  
-  - `ScheduleService`
-- Data yang Dikelola:  
-  `photographer_id`, `name`, `specialty`, `availability`, `experience_years`, `location`
-- Contoh Data:  
+ 4. ScheduleService
+- Provider untuk: PhotographyService
+- Consumer dari: OrderService
 
-  {
-    "photographer_id": "PH001",
-    "name": "Adiawarja",
-    "specialty": "Prewedding",
-    "availability": "Available",
-    "experience_years": 8,
-    "location": "Bali"
-  }
+Revisi:  
+- Hapus ketergantungan langsung ke ClientService. Hanya ambil client_id dari OrderService saja. Ini akan membuat relasi lebih ringan dan menghindari redundansi data.
 
-6. PortfolioService
-- Fungsi Utama: Menyimpan hasil akhir sesi foto dan portofolio klien.
-- Provider Untuk:  
-  - `ClientService` (arsip), bisa juga frontend user
-- Consumer Dari:  
-  - `PhotographyService`  
-  - `OrderService`
-- Data yang Dikelola:  
-  `asset_id`, `order_id`, `client_id`, `file_url`, `uploaded_at`, `status`, `notes`
-- Contoh Data:  
 
-  {
-    "asset_id": "AST001",
-    "order_id": "ORD001",
-    "client_id": "CLT001",
-    "file_url": "hozstudio.com/assets/AST001.jpg",
-    "uploaded_at": "2025-04-27",
-    "status": "delivered",
-    "notes": "Retouched"
-  }
+
+ 5. PhotographyService
+- Provider untuk: PortfolioService
+- Consumer dari: ScheduleService
+
+Saran:  
+- Tidak ada perubahan. PhotographyService cukup bergantung pada ScheduleService untuk mendapatkan data tentang jadwal dan fotografer.
+
+
+
+ 6. PortfolioService
+- Provider untuk: Frontend (hanya tampilan pasif dari data)
+- Consumer dari: PhotographyService, OrderService
+
+Revisi:  
+- Jangan konsumsi data langsung dari ClientService karena client_id sudah tersedia di OrderService. Pastikan hanya menggunakan data dari OrderService dan PhotographyService untuk kebutuhan Portfolio.
+
+
+------------------------------------------------------------------------------------------------------
+| Service            | Provider For                           | Consumer From                        |
+|--------------------|----------------------------------------|--------------------------------------|
+| ClientService      | Order, Schedule, Portfolio *(via ID)*  | -                                    |
+| ServiceCatalog     | OrderService                           | -                                    |
+| OrderService       | Schedule, Portfolio                    | ClientService, ServiceCatalog        |
+| ScheduleService    | PhotographyService                     | OrderService                         |
+| PhotographyService | PortfolioService                       | ScheduleService                      |
+| PortfolioService   | Frontend (pasif)                       | PhotographyService, OrderService     |
+------------------------------------------------------------------------------------------------------
+
+/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\/\/\/\/\\//\\/\/\/\/\//\\/\//\/\\//\\/\
+
+---------------------------------------------------------------------
+ClientService       → OrderService
+                    → ScheduleService
+                    → PortfolioService (pasif, via ID)
+
+ServiceCatalog      → OrderService
+
+OrderService        → ScheduleService
+                    → PortfolioService
+
+ScheduleService     → PhotographyService
+
+PhotographyService  → PortfolioService
+
 
 ---------------------------------------------------------------------
 
