@@ -21,7 +21,24 @@ class PhotographyResource extends JsonResource
         return [
             'status' => $this->status,
             'message' => $this->message,
-            'data' => $this->resource,
+            'data' => [
+                'id' => $this->id,
+                'schedule_id' => $this->schedule_id,
+                'foto' => $this->foto,
+                'status' => $this->status,
+                'created_at' => $this->created_at,
+                'updated_at' => $this->updated_at,
+            ],
+        ];
+    }
+
+    public function with($request)
+    {
+        return [
+            'meta' => [
+                'api_version' => '1.0',
+                'timestamp' => now(),
+            ],
         ];
     }
 }

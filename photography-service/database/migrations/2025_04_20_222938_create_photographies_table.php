@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('photographies', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('schedule_id');
+            $table->foreignId('schedule_id')->constrained('schedules')->onDelete('cascade');
             $table->string('foto');
             $table->string('status');
             $table->timestamps();

@@ -9,7 +9,7 @@ class OrderResource extends JsonResource
     protected $status;
     protected $message;
 
-    public function __construct($resource, $status = 'Success', $message = '')
+    public function __construct($resource, $status = 'success', $message = '')
     {
         parent::__construct($resource);
         $this->status = $status;

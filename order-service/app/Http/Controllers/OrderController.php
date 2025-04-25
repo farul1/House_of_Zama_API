@@ -4,11 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 use App\Http\Resources\OrderResource;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
+
 
 class OrderController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
         $query = Order::query();
 
@@ -18,57 +22,149 @@ class OrderController extends Controller
 
         $orders = $query->get();
 
-        return new OrderResource($orders, 'Success', 'List of orders');
+        return response()->json([
+            'status' => 'success',
+            'message' => 'List of orders',
+            'data' => OrderResource::collection($orders),
+        ]);
     }
 
-
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
-        $request->validate([
-            'client_id' => 'required|exists:clients,id',
-            'service_id' => 'required|exists:services,id',
+        $validated = $request->validate([
+            'client_id' => 'required|integer',
+            'service_id' => 'required|string',
             'catatan' => 'nullable|string',
         ]);
 
-        $order = Order::create($request->all());
-        return new OrderResource($order, 'Success', 'Order created successfully');
-    }
+        Log::info('Request data: ', $validated);
 
-    public function show($id)
-    {
-        $order = Order::find($id);
-        if ($order) {
-            return new OrderResource($order, 'Success', 'Order found');
-        } else {
-            return new OrderResource(null, 'Failed', 'Order not found');
+        try {
+            $clientResponse = Http::get("http://localhost:8001/api/client-service/clients/{$validated['client_id']}");
+            Log::info('ClientService response: ', [$clientResponse->status(), $clientResponse->body()]);
+
+            if ($clientResponse->failed()) {
+                return response()->json([
+                    'status' => 'failed',
+                    'message' => 'Client not found in ClientService'
+                ], 404);
+            }
+
+            $serviceResponse = Http::get("http://localhost:8002/api/service-catalog/{$validated['service_id']}");
+            Log::info('ServiceCatalogService response: ', [$serviceResponse->status(), $serviceResponse->body()]);
+
+            if ($serviceResponse->failed()) {
+                return response()->json([
+                    'status' => 'failed',
+                    'message' => 'Service not found in ServiceCatalogService'
+                ], 404);
+            }
+
+            $order = Order::create($validated);
+            Log::info('Order created: ', [$order]);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Order created successfully',
+                'data' => new OrderResource($order)
+            ], 201);
+
+        } catch (\Exception $e) {
+            Log::error('Error creating order: ', ['error' => $e->getMessage()]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error occurred while creating order',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 
-    public function update(Request $request, $id)
+
+    public function update(Request $request, $id): JsonResponse
     {
-        $request->validate([
-            'client_id' => 'required|exists:clients,id',
-            'service_id' => 'required|exists:services,id',
+        $validated = $request->validate([
+            'client_id' => 'required|integer',
+            'service_id' => 'required|string',
             'catatan' => 'nullable|string',
         ]);
 
-        $order = Order::find($id);
-        if ($order) {
-            $order->update($request->all());
-            return new OrderResource($order, 'Success', 'Order updated successfully');
-        } else {
-            return new OrderResource(null, 'Failed', 'Order not found');
+        try {
+            $order = Order::find($id);
+            if (!$order) {
+                return response()->json([
+                    'status' => 'failed',
+                    'message' => 'Order not found',
+                    'data' => null,
+                ], 404);
+            }
+
+            Log::info('Before update:', $order->toArray());
+
+            $order->update($validated);
+            $order->refresh();
+
+            Log::info('After update:', $order->toArray());
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Order updated successfully',
+                'data' => new OrderResource($order),
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Update failed:', ['error' => $e->getMessage()]);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error occurred while updating order',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 
-    public function destroy($id)
+    public function show($id): JsonResponse
+{
+    $order = Order::find($id);
+
+    if (!$order) {
+        return response()->json([
+            'status' => 'failed',
+            'message' => 'Order not found',
+            'data' => null,
+        ], 404);
+    }
+
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Order found',
+        'data' => new OrderResource($order),
+    ]);
+}
+
+
+    public function destroy($id): JsonResponse
     {
-        $order = Order::find($id);
-        if ($order) {
+        try {
+            $order = Order::find($id);
+            if (!$order) {
+                return response()->json([
+                    'status' => 'failed',
+                    'message' => 'Order not found',
+                    'data' => null,
+                ], 404);
+            }
             $order->delete();
-            return new OrderResource($order, 'Success', 'Order deleted successfully');
-        } else {
-            return new OrderResource(null, 'Failed', 'Order not found');
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'Order deleted successfully',
+                'data' => new OrderResource($order),
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Error occurred while deleting order',
+                'error' => $e->getMessage(),
+            ], 500);
         }
     }
 }

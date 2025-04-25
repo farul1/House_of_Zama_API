@@ -23,6 +23,5 @@ Route::get('/ping', function() {
     return response()->json(['message' => 'ServiceCatalogService aktif']);
 });
 
-Route::get('/clients', [ServiceCatalogController::class, 'getClients']);
 
 Route::resource('service-catalog', ServiceCatalogController::class);
