@@ -29,7 +29,7 @@ public function store(Request $request)
     ]);
 
     $client = new \GuzzleHttp\Client();
-    $response = $client->get("http://localhost:8004/api/schedules/{$validated['schedule_id']}");
+    $response = $client->get("http://localhost:9004/api/schedules/{$validated['schedule_id']}");
 
     if ($response->getStatusCode() !== 200) {
         return response()->json([

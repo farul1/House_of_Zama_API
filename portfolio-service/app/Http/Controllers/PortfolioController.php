@@ -20,7 +20,7 @@ class PortfolioController extends Controller
     $photographies = [];
 
     try {
-        $response = Http::get('http://localhost:8005/api/photographies', [
+        $response = Http::get('http://localhost:9005/api/photographies', [
             'ids' => $photographyIds->toArray()
         ]);
 
@@ -50,13 +50,13 @@ class PortfolioController extends Controller
 
         try {
             $client = new Client();
-            $photographyResponse = $client->get('http://localhost:8005/api/photographies/' . $validated['photography_id']);
+            $photographyResponse = $client->get('http://localhost:9005/api/photographies/' . $validated['photography_id']);
 
             if ($photographyResponse->getStatusCode() != 200) {
                 return new PortfolioResource(null, 'Failed', 'Photography not found');
             }
 
-            $orderResponse = Http::get('http://localhost:8003/api/orders/' . $validated['order_id']);
+            $orderResponse = Http::get('http://localhost:9003/api/orders/' . $validated['order_id']);
             if ($orderResponse->failed()) {
                 return new PortfolioResource(null, 'Failed', 'Order not found or invalid');
             }
@@ -79,7 +79,7 @@ class PortfolioController extends Controller
         // Ambil data fotografi dari Photography Service
         $photography = null;
         try {
-            $response = Http::get('http://localhost:8005/api/photographies/' . $portfolio->photography_id);
+            $response = Http::get('http://localhost:9005/api/photographies/' . $portfolio->photography_id);
             if ($response->successful()) {
                 $photography = $response->json();
             }

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: photography-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: photography-app
+  template:
+    metadata:
+      labels:
+        app: photography-app
+    spec:
+      containers:
+        - name: photography-app
+          image: farul672/photography-app:latest
+          ports:
+            - containerPort: 9000
+          envFrom:
+            - configMapRef:
+                name: photography-config
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"

@@ -9,11 +9,11 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::create('photographies', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('schedule_id')->constrained('schedules')->onDelete('cascade');
+            $table->unsignedBigInteger('schedule_id'); // Tidak pakai foreign key
             $table->string('foto');
             $table->string('status');
             $table->timestamps();

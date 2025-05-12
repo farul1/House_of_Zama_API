@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: photography-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: photography-web
+  template:
+    metadata:
+      labels:
+        app: photography-web
+    spec:
+      containers:
+        - name: photography-web
+          image: farul672/photography-nginx:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"

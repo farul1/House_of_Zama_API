@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-queue
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-queue
+  template:
+    metadata:
+      labels:
+        app: order-queue
+    spec:
+      containers:
+        - name: order-queue
+          image: farul672/order-queue:latest
+          command: ["php", "artisan", "queue:work"]
+          envFrom:
+            - configMapRef:
+                name: order-config
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"

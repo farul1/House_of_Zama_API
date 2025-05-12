@@ -17,7 +17,7 @@ public function index()
         $schedules = Schedule::all();
 
         foreach ($schedules as $schedule) {
-            $clientResponse = Http::get("http://localhost:8001/api/client-service/clients/{$schedule->client_id}");
+            $clientResponse = Http::get("http://localhost:9001/api/client-service/clients/{$schedule->client_id}");
 
             if ($clientResponse->successful()) {
                 $schedule->client_data = $clientResponse->json();
@@ -51,8 +51,8 @@ public function index()
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'order_id'   => 'required|integer',     // Validasi menggunakan integer
-            'client_id'  => 'required|integer',     // Validasi menggunakan integer
+            'order_id'   => 'required|integer',
+            'client_id'  => 'required|integer',
             'fotografer' => 'required|string|max:255',
             'tempat'     => 'required|string|max:255',
             'waktu'      => 'required|date',
@@ -119,7 +119,7 @@ public function index()
             ], 404);
         }
 
-        $clientResponse = Http::get("http://localhost:8001/api/client-service/clients/{$schedule->client_id}");
+        $clientResponse = Http::get("http://localhost:9001/api/client-service/clients/{$schedule->client_id}");
 
         if ($clientResponse->successful()) {
             $schedule->client_data = $clientResponse->json();

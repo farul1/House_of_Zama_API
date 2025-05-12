@@ -8,7 +8,9 @@ use Illuminate\Support\Facades\Http;
 use App\Http\Resources\OrderResource;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-
+use App\Mail\OrderConfirmationMail;
+use Illuminate\Support\Facades\Mail;
+use App\Jobs\SendOrderConfirmationEmail;
 
 class OrderController extends Controller
 {
@@ -28,56 +30,70 @@ class OrderController extends Controller
             'data' => OrderResource::collection($orders),
         ]);
     }
+public function store(Request $request): JsonResponse
+{
+    $validated = $request->validate([
+        'client_id'   => 'required|integer',
+        'service_id'  => 'required|string',
+        'catatan'     => 'nullable|string',
+    ]);
 
-    public function store(Request $request): JsonResponse
-    {
-        $validated = $request->validate([
-            'client_id' => 'required|integer',
-            'service_id' => 'required|string',
-            'catatan' => 'nullable|string',
-        ]);
+    Log::info('Incoming order request:', $validated);
 
-        Log::info('Request data: ', $validated);
+    try {
+        // Ambil data client
+        $clientUrl = rtrim(env('CLIENT_SERVICE_URL'), '/') . "/api/client-service/clients/{$validated['client_id']}";
+        $clientResponse = Http::get($clientUrl);
 
-        try {
-            $clientResponse = Http::get("http://localhost:8001/api/client-service/clients/{$validated['client_id']}");
-            Log::info('ClientService response: ', [$clientResponse->status(), $clientResponse->body()]);
-
-            if ($clientResponse->failed()) {
-                return response()->json([
-                    'status' => 'failed',
-                    'message' => 'Client not found in ClientService'
-                ], 404);
-            }
-
-            $serviceResponse = Http::get("http://localhost:8002/api/service-catalog/{$validated['service_id']}");
-            Log::info('ServiceCatalogService response: ', [$serviceResponse->status(), $serviceResponse->body()]);
-
-            if ($serviceResponse->failed()) {
-                return response()->json([
-                    'status' => 'failed',
-                    'message' => 'Service not found in ServiceCatalogService'
-                ], 404);
-            }
-
-            $order = Order::create($validated);
-            Log::info('Order created: ', [$order]);
-
+        if ($clientResponse->failed()) {
+            Log::warning('Client not found', ['client_id' => $validated['client_id']]);
             return response()->json([
-                'status' => 'success',
-                'message' => 'Order created successfully',
-                'data' => new OrderResource($order)
-            ], 201);
-
-        } catch (\Exception $e) {
-            Log::error('Error creating order: ', ['error' => $e->getMessage()]);
-            return response()->json([
-                'status' => 'error',
-                'message' => 'Error occurred while creating order',
-                'error' => $e->getMessage(),
-            ], 500);
+                'status'  => 'failed',
+                'message' => 'Client not found in ClientService'
+            ], 404);
         }
+
+        // Ambil data service
+        $serviceUrl = rtrim(env('SERVICE_CATALOG_URL'), '/') . "/api/service-catalog/{$validated['service_id']}";
+        $serviceResponse = Http::get($serviceUrl);
+
+        if ($serviceResponse->failed()) {
+            Log::warning('Service not found', ['service_id' => $validated['service_id']]);
+            return response()->json([
+                'status'  => 'failed',
+                'message' => 'Service not found in ServiceCatalogService'
+            ], 404);
+        }
+
+        // Simpan order
+        $order = Order::create($validated);
+        Log::info('Order created successfully', ['order_id' => $order->id]);
+
+        // Lampirkan data client
+        $clientData = $clientResponse->json()['data'];
+        $order->client = (object) $clientData;
+
+        // Kirim email jika ada email client
+        if (!empty($clientData['email'])) {
+            dispatch(new SendOrderConfirmationEmail($order, $clientData['email']));
+            Log::info("Email job dispatched to: {$clientData['email']}");
+        }
+
+        return response()->json([
+            'status'  => 'success',
+            'message' => 'Order created successfully',
+            'data'    => new OrderResource($order),
+        ], 201);
+
+    } catch (\Throwable $e) {
+        Log::error('Unexpected error occurred:', ['error' => $e->getMessage()]);
+        return response()->json([
+            'status'  => 'error',
+            'message' => 'Unexpected error occurred while creating order',
+            'error'   => $e->getMessage(),
+        ], 500);
     }
+}
 
 
     public function update(Request $request, $id): JsonResponse

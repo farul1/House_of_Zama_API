@@ -16,3 +16,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/test-redis', function () {
+    Cache::put('redis_test', 'hello redis', 60);
+    return Cache::get('redis_test');
+});

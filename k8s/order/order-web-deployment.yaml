@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order-web
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: order-web
+  template:
+    metadata:
+      labels:
+        app: order-web
+    spec:
+      containers:
+        - name: order-web
+          image: farul672/order-nginx:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"

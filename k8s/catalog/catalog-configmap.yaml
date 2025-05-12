@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: catalog-config
+data:
+  APP_NAME: "Catalog Service"
+  APP_ENV: "production"
+  APP_KEY: base64:somegeneratedkey==
+  APP_DEBUG: "false"
+  APP_URL: http://catalog.local
+  DB_HOST: mysql
+  DB_PORT: "3306"
+  DB_DATABASE: catalog
+  DB_USERNAME: root
+  DB_PASSWORD: password
+  CACHE_DRIVER: redis
+  QUEUE_CONNECTION: redis
+  REDIS_HOST: redis

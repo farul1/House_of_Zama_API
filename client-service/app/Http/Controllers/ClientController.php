@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Resources\ClientResource;
+use Illuminate\Support\Facades\Cache;
 
 class ClientController extends Controller
 {
@@ -37,10 +38,14 @@ class ClientController extends Controller
 
     public function show($id)
     {
-        $client = Client::find($id);
+        $client = Cache::remember("client:{$id}", 3600, function () use ($id) {
+            return Client::find($id); // gunakan find biasa, bukan findOrFail, agar bisa di-handle null
+        });
+
         if ($client) {
             return new ClientResource($client, 'Success', 'Client found');
         }
+
         return new ClientResource(null, 'Failed', 'Client not found');
     }
 
@@ -76,26 +81,6 @@ class ClientController extends Controller
         }
 
         return new ClientResource(null, 'Failed', 'Client not found');
-    }
-
-    public function getOrderHistory($clientId)
-    {
-        try {
-            $url = config('services.order_service.url') . '/api/orders';
-
-            $response = Http::get($url, [
-                'client_id' => $clientId
-            ]);
-
-            if ($response->successful()) {
-                return new ClientResource($response->json(), 'Success', 'Client order history found');
-            }
-
-            return new ClientResource(null, 'Failed', 'Failed to retrieve client order history');
-        } catch (\Exception $e) {
-            Log::error("Order Service Error: " . $e->getMessage());
-            return new ClientResource(null, 'Failed', 'Error while contacting order service');
-        }
     }
 
 }
