@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 
  1. ClientService
@@ -6,6 +7,14 @@
   
 Revisi:  
 - Hilangkan ketergantungan ke OrderService. Hanya simpan `client_id` dan biarkan frontend mengakses histori melalui OrderService dengan endpoint: `/orders/client/{client_id}`.
+=======
+1. ClientService
+- Provider untuk: Order, Schedule, Portfolio (hanya melalui ID)
+- Consumer dari: Tidak ada (histori pemesanan cukup diambil dari OrderService)
+  
+Revisi:  
+- Hilangkan ketergantungan ke OrderService. Hanya simpan client_id dan biarkan frontend mengakses histori melalui OrderService dengan endpoint: /orders/client/{client_id}.
+>>>>>>> 1f5e0a4150a110f2acaaef1c16479acfbcbeab14
 
 
  2. ServiceCatalogService
@@ -21,7 +30,11 @@ Saran:
 - Consumer dari: ClientService, ServiceCatalog
 
 Saran:  
+<<<<<<< HEAD
 - Akses data `ClientService` dan `ServiceCatalog` dilakukan melalui HTTP call atau *queue async* jika diperlukan.
+=======
+- Akses data ClientService dan ServiceCatalog dilakukan melalui HTTP call atau queue async jika diperlukan.
+>>>>>>> 1f5e0a4150a110f2acaaef1c16479acfbcbeab14
 
 
  4. ScheduleService
@@ -29,7 +42,11 @@ Saran:
 - Consumer dari: OrderService
 
 Revisi:  
+<<<<<<< HEAD
 - Hapus ketergantungan langsung ke ClientService. Hanya ambil `client_id` dari OrderService saja. Ini akan membuat relasi lebih ringan dan menghindari redundansi data.
+=======
+- Hapus ketergantungan langsung ke ClientService. Hanya ambil client_id dari OrderService saja. Ini akan membuat relasi lebih ringan dan menghindari redundansi data.
+>>>>>>> 1f5e0a4150a110f2acaaef1c16479acfbcbeab14
 
 
 
@@ -47,11 +64,17 @@ Saran:
 - Consumer dari: PhotographyService, OrderService
 
 Revisi:  
+<<<<<<< HEAD
 - Jangan konsumsi data langsung dari ClientService karena `client_id` sudah tersedia di OrderService. Pastikan hanya menggunakan data dari OrderService dan PhotographyService untuk kebutuhan Portfolio.
 
 
 
  REVISI STRUKTUR FINAL
+=======
+- Jangan konsumsi data langsung dari ClientService karena client_id sudah tersedia di OrderService. Pastikan hanya menggunakan data dari OrderService dan PhotographyService untuk kebutuhan Portfolio.
+
+
+>>>>>>> 1f5e0a4150a110f2acaaef1c16479acfbcbeab14
 ------------------------------------------------------------------------------------------------------
 | Service            | Provider For                           | Consumer From                        |
 |--------------------|----------------------------------------|--------------------------------------|
@@ -63,6 +86,12 @@ Revisi:
 | PortfolioService   | Frontend (pasif)                       | PhotographyService, OrderService     |
 ------------------------------------------------------------------------------------------------------
 
+<<<<<<< HEAD
+=======
+/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\/\/\/\/\\//\\/\/\/\/\//\\/\//\/\\//\\/\
+
+---------------------------------------------------------------------
+>>>>>>> 1f5e0a4150a110f2acaaef1c16479acfbcbeab14
 ClientService       → OrderService
                     → ScheduleService
                     → PortfolioService (pasif, via ID)
